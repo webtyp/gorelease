@@ -1,0 +1,93 @@
+# ARCHIVO GENERADO — no lo edites a mano.
+# Lo produce actiongen y lo mantiene sincronizado un test.
+# Para cambiarlo, edita action_data.go y corre: gotest ./...
+
+name: Create GitHub Release
+description: Builds Go project to cross-platform binaries and creates a GitHub Release
+author: tinywasm
+branding:
+  icon: package
+  color: blue
+inputs:
+  version:
+    description: which gorelease version to download; empty = resolve automatically
+    required: false
+  tag:
+    description: tag to release; empty = latest tag from git
+    required: false
+  setup-go:
+    description: run actions/setup-go with the project go.mod
+    required: false
+    default: 'true'
+outputs:
+  gorelease-version:
+    description: the version that was resolved and downloaded
+    value: '${{ steps.gorelease.outputs.version }}'
+runs:
+  using: composite
+  steps:
+    # The version comes from the project go.mod, so the caller picks it, not us.
+    - name: Setup Go
+      if: 'inputs.setup-go == ''true'''
+      uses: actions/setup-go@v5
+      with:
+        go-version-file: go.mod
+    - name: Resolve and download the gorelease binary
+      id: gorelease
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        version="${{ inputs.version }}"
+        if [ -z "$version" ]; then
+          ref="${{ github.action_ref }}"
+          case "$ref" in
+            v[0-9]*.[0-9]*.[0-9]*) version="$ref" ;;
+            *)
+              # A floating ref such as v1 carries no release number, so ask GitHub
+              # which release is current.
+              version="$(curl -fsSL https://api.github.com/repos/tinywasm/gorelease/releases/latest \
+                | sed -n 's/.*"tag_name": *"\([^"]*\)".*/\1/p' | head -n1)"
+              ;;
+          esac
+        fi
+
+        # Last resort only. This literal is baked at generation time, so it can never
+        # name the tag being released right now.
+        if [ -z "$version" ]; then
+          version="v0.0.1"
+        fi
+
+        case "$(uname -s)-$(uname -m)" in
+          Linux-x86_64)  asset=gorelease-linux-amd64 ;;
+          Linux-aarch64) asset=gorelease-linux-arm64 ;;
+          Darwin-arm64)  asset=gorelease-darwin-arm64 ;;
+          Darwin-x86_64) asset=gorelease-darwin-amd64 ;;
+          *) echo "gorelease: unsupported platform: $(uname -s)-$(uname -m)" >&2; exit 1 ;;
+        esac
+
+        url="https://github.com/tinywasm/gorelease/releases/download/${version}/${asset}"
+        dest="${RUNNER_TEMP}/gorelease"
+
+        if ! curl -fsSL "$url" -o "$dest"; then
+          echo "gorelease: no ${asset} binary in release ${version}." >&2
+          echo "  URL: ${url}" >&2
+          echo "  The likely cause is that gorelease never ran for that tag." >&2
+          echo "  Check https://github.com/tinywasm/gorelease/releases and pin a version that does have binaries via the 'version' input." >&2
+          exit 1
+        fi
+
+        chmod +x "$dest"
+        echo "$(dirname "$dest")" >> "$GITHUB_PATH"
+        echo "version=${version}" >> "$GITHUB_OUTPUT"
+    - name: Create GitHub Release
+      shell: bash
+      run: |
+        set -euo pipefail
+        tag="${{ inputs.tag }}"
+        if [ -z "$tag" ]; then
+          gorelease
+        else
+          gorelease "$tag"
+        fi
+
