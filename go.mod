@@ -12,6 +12,7 @@ require (
 	github.com/tinywasm/await v0.1.0 // indirect
 	github.com/tinywasm/base64 v0.0.5 // indirect
 	github.com/tinywasm/dbus v0.1.0 // indirect
+	github.com/tinywasm/ghaction v0.1.0 // indirect
 	github.com/tinywasm/webauthn v0.1.1 // indirect
 	golang.org/x/sys v0.47.0 // indirect
 	golang.org/x/term v0.45.0 // indirect

@@ -1,5 +1,8 @@
-name: Test
+# GENERATED FILE — do not edit manually.
+# Produced by ghaction and kept in sync by a test.
+# To change it, edit the workflow definition and run: gotest ./...
 
+name: Test
 on:
   push:
     branches: [main]
@@ -9,14 +12,15 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-
-      - uses: actions/setup-go@v6
+      -
+        uses: actions/checkout@v5
+      -
+        uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
-
       - name: go vet
+        shell: bash
         run: go vet ./...
-
       - name: go test
+        shell: bash
         run: go test ./... -count=1

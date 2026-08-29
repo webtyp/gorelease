@@ -4,6 +4,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/tinywasm/ghaction"
 	"github.com/tinywasm/gorelease"
 )
 
@@ -16,7 +17,7 @@ func TestActionYmlIsInSync(t *testing.T) {
 	actionPath := filepath.Join("..", gorelease.ActionFilePath)
 	a := gorelease.GoreleaseAction(tag)
 
-	changed, err := gorelease.Sync(actionPath, a)
+	changed, err := ghaction.Sync(actionPath, a)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/tinywasm/ghaction"
 	"github.com/tinywasm/git"
 )
 
@@ -28,7 +29,8 @@ func LatestReleaseTag() (string, error) {
 // It is a pure-bash composite action: no binary download, no extra weight.
 // All cross-compile targets, ldflags and publish logic are derived from the
 // DRY constants in gorelease.go (DefaultTargets, VersionLdFlag, etc.).
-func GoreleaseAction(_ string) Action {
+// Uses ghaction typed Action with presets for Node24 optimal defaults.
+func GoreleaseAction(_ string) ghaction.Action {
 	// DRY: derive bash targets from DefaultTargets() instead of hardcoding.
 	targets := DefaultTargets()
 	var targetList []string
@@ -145,28 +147,28 @@ fi
 echo "✅ Release → $url"
 `, DistDir, DistDir)
 
-	return Action{
+	return ghaction.Action{
 		Name:        "Create GitHub Release",
 		Description: "Builds Go project to cross-platform binaries and creates a GitHub Release",
 		Author:      "tinywasm",
-		Branding: Branding{
+		Branding: ghaction.Branding{
 			Icon:  "package",
 			Color: "blue",
 		},
-		Inputs: []Input{
+		Inputs: []ghaction.Input{
 			{Name: "tag", Description: "tag to release; empty = latest tag from git (highest semver)", Default: "", Required: false},
 			{Name: "setup-go", Description: "run actions/setup-go with the project go.mod", Default: "true", Required: false},
 		},
-		Outputs: []Output{
+		Outputs: []ghaction.Output{
 			{Name: "release-url", Description: "URL of the created GitHub Release", Value: "${{ steps.release.outputs.url }}"},
 		},
-		Steps: []Step{
+		Steps: []ghaction.Step{
 			{
 				Name:    "Setup Go",
 				If:      "inputs.setup-go == 'true'",
-				Uses:    "actions/setup-go@v6",
-				With:    []KeyValue{{Key: "go-version-file", Value: "go.mod"}},
-				Comment: "The version comes from the project go.mod, so the caller picks it, not us. Updated to Node 24 (setup-go@v6).",
+				Uses:    ghaction.DefaultSetupGo,
+				With:    []ghaction.KeyValue{{Key: "go-version-file", Value: ghaction.DefaultGoVersionFile}},
+				Comment: "The version comes from the project go.mod, so the caller picks it, not us. Updated to Node 24 via ghaction.",
 			},
 			{
 				Name:  "Build cross-platform binaries",

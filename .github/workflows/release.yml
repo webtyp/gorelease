@@ -1,5 +1,8 @@
-name: Release
+# GENERATED FILE — do not edit manually.
+# Produced by ghaction and kept in sync by a test.
+# To change it, edit the workflow definition and run: gotest ./...
 
+name: Release
 on:
   push:
     tags: ['v*']
@@ -11,30 +14,24 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      -
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
-          fetch-tags: true
-
-      - uses: actions/setup-go@v6
+          fetch-tags: 'true'
+      -
+        uses: actions/setup-go@v6
         with:
-          go-version-file: 'go.mod'
-
-      # gorelease is a developer-machine tool that authenticates through
-      # tinywasm/keyring. On a GitHub runner the credential store is unavailable,
-      # so `gorelease` would fail even with GH_TOKEN. In CI we build and publish
-      # the binaries directly with `gh` and GH_TOKEN. The composite action
-      # `tinywasm/gorelease@v1` remains the single-line interface for *other*
-      # repositories (and for developer machines), kept in sync via
-      # tests/action_sync_test.go.
+          go-version-file: go.mod
       - name: Build the release binaries
+        shell: bash
         run: |
           set -euo pipefail
           mkdir -p dist
-          for target in linux/amd64 linux/arm64 darwin/amd64 darwin/arm64; do
-            os="${target%/*}"
-            arch="${target#*/}"
-            CGO_ENABLED=0 GOOS="$os" GOARCH="$arch" \
+          for target in linux/amd64 linux/arm64 darwin/arm64 darwin/amd64; do
+            os=${target%/*}
+            arch=${target##*/}
+            CGO_ENABLED=0 GOOS=$os GOARCH=$arch \
               go build -trimpath -ldflags="-s -w -X github.com/tinywasm/gorelease.Version=${GITHUB_REF_NAME} -X main.Version=${GITHUB_REF_NAME}" \
               -o "dist/gorelease-${os}-${arch}" ./cmd/gorelease
           done
@@ -46,8 +43,7 @@ jobs:
           ls -l dist
 
       - name: Publish the release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
         run: |
           set -euo pipefail
           tag="${GITHUB_REF_NAME}"
@@ -59,8 +55,12 @@ jobs:
               --generate-notes
           fi
 
+        env:
+          GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
       - name: Move the v1 tag
+        shell: bash
         run: |
           set -euo pipefail
           git tag -f v1 "${GITHUB_SHA}"
           git push origin -f v1
+

@@ -1,5 +1,5 @@
 # GENERATED FILE — do not edit manually.
-# Produced by render.go and kept in sync by a test.
+# Produced by ghaction and kept in sync by a test.
 # To change it, edit action_data.go and run: gotest ./...
 
 name: Create GitHub Release
@@ -23,7 +23,7 @@ outputs:
 runs:
   using: composite
   steps:
-    # The version comes from the project go.mod, so the caller picks it, not us. Updated to Node 24 (setup-go@v6).
+    # The version comes from the project go.mod, so the caller picks it, not us. Updated to Node 24 via ghaction.
     - name: Setup Go
       if: 'inputs.setup-go == ''true'''
       uses: actions/setup-go@v6
