@@ -1,4 +1,5 @@
 # gorelease
+<img src="docs/img/badges.svg">
 
 Create GitHub releases with cross-platform binaries for an existing tag.
 
