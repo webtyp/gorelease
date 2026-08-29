@@ -8,8 +8,7 @@ import (
 )
 
 const (
-	ActionFilePath     = "action.yml"
-	ReleaseAssetURLFmt = "https://github.com/tinywasm/gorelease/releases/download/%s/%s"
+	ActionFilePath = "action.yml"
 )
 
 // LatestReleaseTag returns the highest semver tag in the repository.
@@ -26,64 +25,125 @@ func LatestReleaseTag() (string, error) {
 }
 
 // GoreleaseAction builds the description of the gorelease action.
-func GoreleaseAction(goreleaseVersion string) Action {
-	if goreleaseVersion == "" {
-		goreleaseVersion = "v0.1.0"
+// It is a pure-bash composite action: no binary download, no extra weight.
+// All cross-compile targets, ldflags and publish logic are derived from the
+// DRY constants in gorelease.go (DefaultTargets, VersionLdFlag, etc.).
+func GoreleaseAction(_ string) Action {
+	// DRY: derive bash targets from DefaultTargets() instead of hardcoding.
+	targets := DefaultTargets()
+	var targetList []string
+	for _, t := range targets {
+		targetList = append(targetList, fmt.Sprintf("%s/%s", t.GOOS, t.GOARCH))
 	}
+	targetsStr := strings.Join(targetList, " ")
 
-	downloadScript := fmt.Sprintf(`set -euo pipefail
+	// DRY: ldflags prefix comes from VersionLdFlag("") -> "-s -w"
+	ldflagsBase := VersionLdFlag("")
 
-version="${{ inputs.version }}"
-if [ -z "$version" ]; then
-  ref="${{ github.action_ref }}"
-  case "$ref" in
-    v[0-9]*.[0-9]*.[0-9]*) version="$ref" ;;
-    *)
-      # A floating ref such as v1 carries no release number, so ask GitHub
-      # which release is current.
-      version="$(curl -fsSL https://api.github.com/repos/tinywasm/gorelease/releases/latest \
-        | sed -n 's/.*"tag_name": *"\([^"]*\)".*/\1/p' | head -n1)"
-      ;;
-  esac
+	buildScript := fmt.Sprintf(`set -euo pipefail
+
+tag="${{ inputs.tag }}"
+if [ -z "$tag" ]; then
+  tag=$(git tag --list 'v*' --sort=-v:refname | head -n1)
 fi
-
-# Last resort only. This literal is baked at generation time, so it can never
-# name the tag being released right now.
-if [ -z "$version" ]; then
-  version="%s"
+if [ -z "$tag" ]; then
+  echo "no tags found in repository" >&2
+  exit 1
 fi
+echo "Releasing $tag"
 
-case "$(uname -s)-$(uname -m)" in
-  Linux-x86_64)  asset=gorelease-linux-amd64 ;;
-  Linux-aarch64) asset=gorelease-linux-arm64 ;;
-  Darwin-arm64)  asset=gorelease-darwin-arm64 ;;
-  Darwin-x86_64) asset=gorelease-darwin-amd64 ;;
-  *) echo "gorelease: unsupported platform: $(uname -s)-$(uname -m)" >&2; exit 1 ;;
-esac
-
-url="https://github.com/tinywasm/gorelease/releases/download/${version}/${asset}"
-dest="${RUNNER_TEMP}/gorelease"
-
-if ! curl -fsSL "$url" -o "$dest"; then
-  echo "gorelease: no ${asset} binary in release ${version}." >&2
-  echo "  URL: ${url}" >&2
-  echo "  The likely cause is that gorelease never ran for that tag." >&2
-  echo "  Check https://github.com/tinywasm/gorelease/releases and pin a version that does have binaries via the 'version' input." >&2
+# Validate cmd/ layout
+if [ ! -d "cmd" ]; then
+  echo "no cmd/ found in $(pwd)" >&2
+  exit 1
+fi
+cmds=$(ls -1 cmd 2>/dev/null || true)
+if [ -z "$cmds" ]; then
+  echo "no cmd/ found in $(pwd)" >&2
   exit 1
 fi
 
-chmod +x "$dest"
-echo "$(dirname "$dest")" >> "$GITHUB_PATH"
-echo "version=${version}" >> "$GITHUB_OUTPUT"`, goreleaseVersion)
+mkdir -p %s
 
-	runScript := `set -euo pipefail
+for cmd in $cmds; do
+  if [ ! -d "cmd/$cmd" ]; then
+    continue
+  fi
+  for target in %s; do
+    os=${target%%/*}
+    arch=${target##*/}
+    suffix="-$os-$arch"
+    if [ "$os" = "windows" ]; then
+      suffix="$suffix.exe"
+    fi
+    output="%s/$cmd$suffix"
+    echo "Building $cmd for $os/$arch..."
+    CGO_ENABLED=0 GOOS=$os GOARCH=$arch go build -trimpath -ldflags="%s -X main.Version=$tag" -o "$output" "./cmd/$cmd"
+  done
+done
+
+# Generate checksums (DRY: filename from const)
+(cd %s && sha256sum * > %s)
+ls -l %s
+`, DistDir, targetsStr, DistDir, ldflagsBase, DistDir, ChecksumFile, DistDir)
+
+	publishScript := fmt.Sprintf(`set -euo pipefail
+
 tag="${{ inputs.tag }}"
 if [ -z "$tag" ]; then
-  gorelease
-else
-  gorelease "$tag"
+  tag=$(git tag --list 'v*' --sort=-v:refname | head -n1)
 fi
-`
+
+# Resolve publish target: private origin -> derived public repo, else origin
+folder=$(basename "$(pwd)")
+target=""
+if ! repo_json=$(gh repo view --json owner,visibility 2>/dev/null); then
+  target=""
+else
+  visibility=$(echo "$repo_json" | jq -r .visibility)
+  if [ "$visibility" = "PUBLIC" ]; then
+    target=""
+  else
+    owner=$(echo "$repo_json" | jq -r .owner.login)
+    candidate="$owner/$folder"
+    if ! cand_json=$(gh repo view "$candidate" --json visibility 2>/dev/null); then
+      echo "origin is private, but derived repo $candidate does not exist or is not accessible. A public repository is required for distribution" >&2
+      exit 1
+    fi
+    cand_vis=$(echo "$cand_json" | jq -r .visibility)
+    if [ "$cand_vis" != "PUBLIC" ]; then
+      echo "origin is private, and derived repo $candidate is also $cand_vis. A PUBLIC repository is required for distribution" >&2
+      exit 1
+    fi
+    target="$candidate"
+  fi
+fi
+
+# Create GitHub Release with assets from %s
+if [ -n "$target" ]; then
+  echo "Publishing to derived repo $target"
+  repo_flag="--repo $target"
+else
+  echo "Publishing to origin"
+  repo_flag=""
+fi
+
+assets=(%s/*)
+
+if gh release view "$tag" $repo_flag >/dev/null 2>&1; then
+  echo "Release $tag already exists, uploading assets..."
+  gh release upload "$tag" "${assets[@]}" --clobber $repo_flag
+else
+  gh release create "$tag" "${assets[@]}" --title "$tag" --generate-notes $repo_flag
+fi
+
+if [ -n "$target" ]; then
+  url="https://github.com/$target/releases/tag/$tag"
+else
+  url=$(gh release view "$tag" --json url --jq .url 2>/dev/null || echo "https://github.com/$(gh repo view --json nameWithOwner --jq .nameWithOwner)/releases/tag/$tag")
+fi
+echo "✅ Release → $url"
+`, DistDir, DistDir)
 
 	return Action{
 		Name:        "Create GitHub Release",
@@ -94,31 +154,31 @@ fi
 			Color: "blue",
 		},
 		Inputs: []Input{
-			{Name: "version", Description: "which gorelease version to download; empty = resolve automatically", Default: "", Required: false},
-			{Name: "tag", Description: "tag to release; empty = latest tag from git", Default: "", Required: false},
+			{Name: "tag", Description: "tag to release; empty = latest tag from git (highest semver)", Default: "", Required: false},
 			{Name: "setup-go", Description: "run actions/setup-go with the project go.mod", Default: "true", Required: false},
 		},
 		Outputs: []Output{
-			{Name: "gorelease-version", Description: "the version that was resolved and downloaded", Value: "${{ steps.gorelease.outputs.version }}"},
+			{Name: "release-url", Description: "URL of the created GitHub Release", Value: "${{ steps.release.outputs.url }}"},
 		},
 		Steps: []Step{
 			{
 				Name:    "Setup Go",
 				If:      "inputs.setup-go == 'true'",
-				Uses:    "actions/setup-go@v5",
+				Uses:    "actions/setup-go@v6",
 				With:    []KeyValue{{Key: "go-version-file", Value: "go.mod"}},
-				Comment: "The version comes from the project go.mod, so the caller picks it, not us.",
+				Comment: "The version comes from the project go.mod, so the caller picks it, not us. Updated to Node 24 (setup-go@v6).",
 			},
 			{
-				Name:  "Resolve and download the gorelease binary",
-				ID:    "gorelease",
+				Name:  "Build cross-platform binaries",
+				ID:    "build",
 				Shell: "bash",
-				Run:   downloadScript,
+				Run:   buildScript,
 			},
 			{
 				Name:  "Create GitHub Release",
+				ID:    "release",
 				Shell: "bash",
-				Run:   runScript,
+				Run:   publishScript,
 			},
 		},
 	}

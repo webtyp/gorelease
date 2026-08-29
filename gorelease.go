@@ -11,12 +11,27 @@ import (
 	"github.com/tinywasm/command"
 )
 
-// Version is injected at build time via -ldflags="-X main.Version=...".
+// Version is injected at build time via -ldflags="-X github.com/tinywasm/gorelease.Version=...".
 // It is also used by `gorelease version` output.
 var Version = "v0.0.0"
 
 // CrossTarget represents a compilation target platform.
 type CrossTarget struct{ GOOS, GOARCH string }
+
+// DRY constants — single source of truth for both Go and generated bash action.
+const (
+	ChecksumFile = "checksums.txt"
+	DistDir      = "dist"
+)
+
+// VersionLdFlag returns the -ldflags value for version injection.
+func VersionLdFlag(tag string) string {
+	ldflags := "-s -w"
+	if tag != "" {
+		ldflags += fmt.Sprintf(" -X main.Version=%s", tag)
+	}
+	return ldflags
+}
 
 // GitClient is the minimal git interface needed by ReleaseOnly.
 type GitClient interface {
@@ -194,10 +209,7 @@ func (g *Gorelease) resolvePublishTarget(folderName string, gh GitHubClient) (st
 }
 
 func crossBuildArgs(tag, cmd, outputPath string) []string {
-	ldflags := "-s -w"
-	if tag != "" {
-		ldflags += fmt.Sprintf(" -X main.Version=%s", tag)
-	}
+	ldflags := VersionLdFlag(tag)
 	return []string{
 		"build",
 		"-o", outputPath,

@@ -6,6 +6,9 @@ Create GitHub Release with cross-platform binaries for an existing tag.
 a Go project's `cmd/` binaries for multiple platforms and uploads them as assets to a
 GitHub Release.
 
+The CLI (`cmd/gorelease`) and the GitHub Action (`tinywasm/gorelease@v1`) share the same DRY
+constants (`DefaultTargets`, `VersionLdFlag`, etc.). The action is pure bash — no binary download.
+
 ## Installation
 
 ```bash
@@ -26,34 +29,34 @@ gorelease version
 
 ### Commands
 
-* **version**: Prints `GORELEASE_VERSION=<version>` and exits. Used by the GitHub Action.
+* **version**: Prints `GORELEASE_VERSION=<version>` and exits.
 
 ### Behavior
 
 1. **Validation**: Verifies that the repository has a `cmd/` directory with at least one subdirectory.
-2. **Tag Resolution**: If no tag is provided, reads the latest tag from git.
+2. **Tag Resolution**: If no tag is provided, reads the latest tag from git (`git tag --list 'v*' --sort=-v:refname | head -n1` in the bash action, `GetLatestTag()` in the Go CLI).
 3. **Cross-Compilation**: Compiles all commands found in `cmd/` for the following platforms:
     * Linux (amd64, arm64)
     * macOS (arm64, amd64)
     * Windows (amd64)
 
-   It injects the version into `main.Version` and uses optimization flags (`-s -w -trimpath`).
+   It injects the version into `main.Version` and uses optimization flags (`-s -w -trimpath`, via `VersionLdFlag`).
 
-4. **Checksums**: Generates a `checksums.txt` file (SHA256) for all compiled binaries and includes it as a release asset.
+4. **Checksums**: Generates a `checksums.txt` file (SHA256) for all compiled binaries and includes it as a release asset (`DistDir`/`ChecksumFile`).
 
 5. **Target Resolution**: Automatically decides where to publish the release:
     * If `origin` is **PUBLIC**, it publishes to `origin` (classic behavior).
     * If `origin` is **PRIVATE**, it derives a public repository name: `<owner>/<folder-name>`.
       If that repository exists and is public, it publishes there using the `--repo` flag.
-      This allows maintaining private source code while distributing public binaries.
+      This allows maintaining private source code while distributing public binaries. Bash action uses `gh repo view --json owner,visibility` with `jq`.
 
 6. **GitHub Release**: Creates a GitHub Release using the `gh` CLI, with the tag name as
    the title, and uploads the cross-compiled binaries and checksums as release assets.
-7. **Cleanup**: Automatically removes the temporary directory used for compilation.
+7. **Cleanup**: Automatically removes the temporary directory (Go CLI, `os.MkdirTemp gorelease-*`) or `dist/` (bash action, created fresh).
 
 ### Targets
 
-The default compilation targets are:
+The default compilation targets are (single source of truth: `DefaultTargets()`):
 
 | OS | Architecture | Artifact Name |
 |---|---|---|
@@ -66,9 +69,9 @@ The default compilation targets are:
 ### Requirements
 
 * `go` installed and in PATH.
-* `gh` (GitHub CLI) installed, authenticated, and in PATH.
+* `gh` (GitHub CLI) installed, authenticated via `GH_TOKEN`/`GITHUB_TOKEN` in CI or via `tinywasm/keyring` locally, and in PATH. Also `jq` for JSON parsing in the bash action.
 * A standard Go project structure with a `go.mod` file and a `cmd/` directory.
-* An existing tag in the git repository (created by `gopush` or `codejob`).
+* An existing tag in the git repository.
 
 ## Examples
 
@@ -83,17 +86,20 @@ gorelease v1.2.3
 gorelease version
 ```
 
-## GitHub Action
+## GitHub Action (pure bash)
 
-Use as a composite action in workflows:
+Use as a composite action in workflows. No binary is downloaded.
 
 ```yaml
 - uses: tinywasm/gorelease@v1
   with:
-    tag: v1.2.3        # optional, defaults to latest tag
-    version: v0.1.0    # optional, pins gorelease version
-    setup-go: 'true'   # optional, run actions/setup-go
+    tag: v1.2.3     # optional, defaults to latest tag
+    setup-go: 'true' # optional, run actions/setup-go@v6 (Node 24)
+  env:
+    GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
+
+Inputs: `tag`, `setup-go`. Outputs: `release-url`. The action builds directly with `go build` on the runner (uses `actions/checkout@v5`, `actions/setup-go@v6` — Node 24).
 
 ## Flow Diagram
 
