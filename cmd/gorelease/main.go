@@ -26,7 +26,7 @@ Commands:
 Publication:
     If the current repository is PRIVATE, gorelease automatically attempts to
     publish the release to a PUBLIC repository named after the current directory.
-    E.g. from ~/Dev/tinywasm/app with origin PRIVATE: publishes to <owner>/app.
+    E.g. from ~/work/myapp with origin PRIVATE: publishes to <owner>/myapp.
 
 Features:
     - Automatic target resolution (private source -> public distribution).

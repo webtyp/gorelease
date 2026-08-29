@@ -127,19 +127,19 @@ func argsHaveRepoFlag(args []string) bool {
 }
 
 func TestReleaseOnly_PrivateOrigin_PublishesToDerivedPublicRepo(t *testing.T) {
-	cleanup := createAppDir(t, "app", "tinywasm")
+	cleanup := createAppDir(t, "myapp", "myapp")
 	defer cleanup()
 
 	runner := &scriptedRunner{respond: func(args []string) (string, error) {
 		if isRepoView(args) {
 			switch repoViewTarget(args) {
 			case "":
-				return `{"owner":{"login":"tinywasm"},"name":"core","visibility":"PRIVATE"}`, nil
-			case "tinywasm/app":
-				return `{"owner":{"login":"tinywasm"},"name":"app","visibility":"PUBLIC"}`, nil
+				return `{"owner":{"login":"acme"},"name":"private-source","visibility":"PRIVATE"}`, nil
+			case "acme/myapp":
+				return `{"owner":{"login":"acme"},"name":"myapp","visibility":"PUBLIC"}`, nil
 			}
 		}
-		return "https://github.com/tinywasm/app/releases/tag/v0.3.0", nil
+		return "https://github.com/acme/myapp/releases/tag/v0.3.0", nil
 	}}
 
 	goHandler, _ := gorelease.New(&MockGitClient{latestTag: "v0.3.0"})
@@ -154,8 +154,8 @@ func TestReleaseOnly_PrivateOrigin_PublishesToDerivedPublicRepo(t *testing.T) {
 	if args == nil {
 		t.Fatal("no `gh release create` call recorded")
 	}
-	if !argsContainRepo(args, "tinywasm/app") {
-		t.Errorf("expected release published to tinywasm/app via --repo, got args: %v", args)
+	if !argsContainRepo(args, "acme/myapp") {
+		t.Errorf("expected release published to acme/myapp via --repo, got args: %v", args)
 	}
 }
 
@@ -188,16 +188,16 @@ func TestReleaseOnly_PublicOrigin_PublishesToOrigin(t *testing.T) {
 }
 
 func TestReleaseOnly_PrivateOrigin_DerivedRepoNotPublic_Errors(t *testing.T) {
-	cleanup := createAppDir(t, "app", "tinywasm")
+	cleanup := createAppDir(t, "myapp", "myapp")
 	defer cleanup()
 
 	runner := &scriptedRunner{respond: func(args []string) (string, error) {
 		if isRepoView(args) {
 			switch repoViewTarget(args) {
 			case "":
-				return `{"owner":{"login":"tinywasm"},"name":"core","visibility":"PRIVATE"}`, nil
-			case "tinywasm/app":
-				return `{"owner":{"login":"tinywasm"},"name":"app","visibility":"PRIVATE"}`, nil
+				return `{"owner":{"login":"acme"},"name":"private-source","visibility":"PRIVATE"}`, nil
+			case "acme/myapp":
+				return `{"owner":{"login":"acme"},"name":"myapp","visibility":"PRIVATE"}`, nil
 			}
 		}
 		return "should-not-reach-release-create", nil
@@ -220,14 +220,14 @@ func TestReleaseOnly_PrivateOrigin_DerivedRepoNotPublic_Errors(t *testing.T) {
 }
 
 func TestReleaseOnly_VisibilityUndetermined_FallsBackToOrigin(t *testing.T) {
-	cleanup := createAppDir(t, "app", "tinywasm")
+	cleanup := createAppDir(t, "myapp", "myapp")
 	defer cleanup()
 
 	runner := &scriptedRunner{respond: func(args []string) (string, error) {
 		if isRepoView(args) {
 			return "not json", nil
 		}
-		return "https://github.com/tinywasm/core/releases/tag/v0.3.0", nil
+		return "https://github.com/acme/private-source/releases/tag/v0.3.0", nil
 	}}
 
 	goHandler, _ := gorelease.New(&MockGitClient{latestTag: "v0.3.0"})
@@ -248,16 +248,16 @@ func TestReleaseOnly_VisibilityUndetermined_FallsBackToOrigin(t *testing.T) {
 }
 
 func TestReleaseOnly_PrivateOrigin_DerivedRepoMissing_Errors(t *testing.T) {
-	cleanup := createAppDir(t, "app", "tinywasm")
+	cleanup := createAppDir(t, "myapp", "myapp")
 	defer cleanup()
 
 	runner := &scriptedRunner{respond: func(args []string) (string, error) {
 		if isRepoView(args) {
 			switch repoViewTarget(args) {
 			case "":
-				return `{"owner":{"login":"tinywasm"},"name":"core","visibility":"PRIVATE"}`, nil
-			case "tinywasm/app":
-				return "", errors.New("GraphQL: Could not resolve to a Repository with the name 'tinywasm/app'")
+				return `{"owner":{"login":"acme"},"name":"private-source","visibility":"PRIVATE"}`, nil
+			case "acme/myapp":
+				return "", errors.New("GraphQL: Could not resolve to a Repository with the name 'acme/myapp'")
 			}
 		}
 		return "should-not-reach-release-create", nil

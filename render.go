@@ -5,9 +5,9 @@ import (
 	"strings"
 )
 
-const HeaderGenerated = `# ARCHIVO GENERADO — no lo edites a mano.
-# Lo produce actiongen y lo mantiene sincronizado un test.
-# Para cambiarlo, edita action_data.go y corre: gotest ./...`
+const HeaderGenerated = `# GENERATED FILE — do not edit manually.
+# Produced by render.go and kept in sync by a test.
+# To change it, edit action_data.go and run: gotest ./...`
 
 // Render produces the action YAML. It is deterministic.
 func (a Action) Render() []byte {
