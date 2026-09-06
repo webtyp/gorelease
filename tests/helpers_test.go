@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/tinywasm/gorelease"
+	"webtyp.com/gorelease"
 )
 
 // testChdir changes to the specified directory and returns a cleanup function.

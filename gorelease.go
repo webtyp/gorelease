@@ -8,10 +8,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/tinywasm/command"
+	"webtyp.com/command"
 )
 
-// Version is injected at build time via -ldflags="-X github.com/tinywasm/gorelease.Version=...".
+// Version is injected at build time via -ldflags="-X webtyp.com/gorelease.Version=...".
 // It is also used by `gorelease version` output.
 var Version = "v0.0.0"
 

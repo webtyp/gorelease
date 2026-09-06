@@ -3,7 +3,7 @@ package gorelease_test
 import (
 	"testing"
 
-	"github.com/tinywasm/gorelease"
+	"webtyp.com/gorelease"
 )
 
 func TestDefaultTargets_CoversDistributionMatrix(t *testing.T) {

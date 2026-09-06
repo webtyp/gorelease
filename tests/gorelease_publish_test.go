@@ -2,13 +2,13 @@ package gorelease_test
 
 import (
 	"errors"
-	gitmod "github.com/tinywasm/git"
+	gitmod "webtyp.com/git"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 
-	"github.com/tinywasm/gorelease"
+	"webtyp.com/gorelease"
 )
 
 type scriptedRunner struct {

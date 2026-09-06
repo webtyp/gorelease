@@ -5,18 +5,18 @@ Create GitHub releases with cross-platform binaries for an existing tag.
 
 `gorelease` is a release-only tool: it does not create tags or commits. It cross-compiles a Go project's `cmd/` binaries for multiple platforms and uploads them as assets to a GitHub Release.
 
-The CLI binary (`cmd/gorelease`) is for local developer use. The GitHub Action (`tinywasm/gorelease@v1`) is a **pure-bash composite action** generated from Go — no binary download, ~0MB overhead — that reuses the same DRY constants (`DefaultTargets`, `VersionLdFlag`, `DistDir`, etc.).
+The CLI binary (`cmd/gorelease`) is for local developer use. The GitHub Action (`webtyp/gorelease@v1`) is a **pure-bash composite action** generated from Go — no binary download, ~0MB overhead — that reuses the same DRY constants (`DefaultTargets`, `VersionLdFlag`, `DistDir`, etc.).
 
 ## Installation (CLI)
 
 ```bash
-go install github.com/tinywasm/gorelease/cmd/gorelease@latest
+go install webtyp.com/gorelease/cmd/gorelease@latest
 ```
 
 ## Usage as GitHub Action (pure bash)
 
 ```yaml
-- uses: tinywasm/gorelease@v1
+- uses: webtyp/gorelease@v1
   with:
     tag: v1.2.3        # optional, defaults to latest tag (highest semver)
   env:

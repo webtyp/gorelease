@@ -3,7 +3,7 @@ package gorelease
 import (
 	"fmt"
 
-	"github.com/tinywasm/ghaction"
+	"webtyp.com/ghaction"
 )
 
 // ReleaseWorkflow returns the typed release workflow for gorelease self-release.
@@ -16,12 +16,12 @@ for target in %s; do
   os=${target%%/*}
   arch=${target##*/}
   CGO_ENABLED=0 GOOS=$os GOARCH=$arch \
-    go build -trimpath -ldflags="-s -w -X github.com/tinywasm/gorelease.Version=${GITHUB_REF_NAME} -X main.Version=${GITHUB_REF_NAME}" \
+    go build -trimpath -ldflags="-s -w -X webtyp.com/gorelease.Version=${GITHUB_REF_NAME} -X main.Version=${GITHUB_REF_NAME}" \
     -o "%s/gorelease-${os}-${arch}" ./cmd/gorelease
 done
 # windows needs .exe
 CGO_ENABLED=0 GOOS=windows GOARCH=amd64 \
-  go build -trimpath -ldflags="-s -w -X github.com/tinywasm/gorelease.Version=${GITHUB_REF_NAME} -X main.Version=${GITHUB_REF_NAME}" \
+  go build -trimpath -ldflags="-s -w -X webtyp.com/gorelease.Version=${GITHUB_REF_NAME} -X main.Version=${GITHUB_REF_NAME}" \
   -o "%s/gorelease-windows-amd64.exe" ./cmd/gorelease
 (cd %s && sha256sum * > %s)
 ls -l %s

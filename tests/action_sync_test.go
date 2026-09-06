@@ -4,8 +4,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/tinywasm/ghaction"
-	"github.com/tinywasm/gorelease"
+	"webtyp.com/ghaction"
+	"webtyp.com/gorelease"
 )
 
 func TestActionYmlIsInSync(t *testing.T) {

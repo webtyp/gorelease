@@ -6,13 +6,13 @@ Create GitHub Release with cross-platform binaries for an existing tag.
 a Go project's `cmd/` binaries for multiple platforms and uploads them as assets to a
 GitHub Release.
 
-The CLI (`cmd/gorelease`) and the GitHub Action (`tinywasm/gorelease@v1`) share the same DRY
+The CLI (`cmd/gorelease`) and the GitHub Action (`webtyp/gorelease@v1`) share the same DRY
 constants (`DefaultTargets`, `VersionLdFlag`, etc.). The action is pure bash — no binary download.
 
 ## Installation
 
 ```bash
-go install github.com/tinywasm/gorelease/cmd/gorelease@latest
+go install webtyp.com/gorelease/cmd/gorelease@latest
 ```
 
 ## Usage
@@ -69,7 +69,7 @@ The default compilation targets are (single source of truth: `DefaultTargets()`)
 ### Requirements
 
 * `go` installed and in PATH.
-* `gh` (GitHub CLI) installed, authenticated via `GH_TOKEN`/`GITHUB_TOKEN` in CI or via `tinywasm/keyring` locally, and in PATH. Also `jq` for JSON parsing in the bash action.
+* `gh` (GitHub CLI) installed, authenticated via `GH_TOKEN`/`GITHUB_TOKEN` in CI or via `webtyp/keyring` locally, and in PATH. Also `jq` for JSON parsing in the bash action.
 * A standard Go project structure with a `go.mod` file and a `cmd/` directory.
 * An existing tag in the git repository.
 
@@ -91,7 +91,7 @@ gorelease version
 Use as a composite action in workflows. No binary is downloaded.
 
 ```yaml
-- uses: tinywasm/gorelease@v1
+- uses: webtyp/gorelease@v1
   with:
     tag: v1.2.3     # optional, defaults to latest tag
     setup-go: 'true' # optional, run actions/setup-go@v6 (Node 24)

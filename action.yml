@@ -4,7 +4,7 @@
 
 name: Create GitHub Release
 description: Builds Go project to cross-platform binaries and creates a GitHub Release
-author: tinywasm
+author: webtyp
 branding:
   icon: package
   color: blue

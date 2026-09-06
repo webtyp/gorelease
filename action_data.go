@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/tinywasm/ghaction"
-	"github.com/tinywasm/git"
+	"webtyp.com/ghaction"
+	"webtyp.com/git"
 )
 
 const (
@@ -150,7 +150,7 @@ echo "✅ Release → $url"
 	return ghaction.Action{
 		Name:        "Create GitHub Release",
 		Description: "Builds Go project to cross-platform binaries and creates a GitHub Release",
-		Author:      "tinywasm",
+		Author:      "webtyp",
 		Branding: ghaction.Branding{
 			Icon:  "package",
 			Color: "blue",

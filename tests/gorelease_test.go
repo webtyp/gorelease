@@ -2,15 +2,15 @@ package gorelease_test
 
 import (
 	"errors"
-	"github.com/tinywasm/command"
-	gitmod "github.com/tinywasm/git"
+	"webtyp.com/command"
+	gitmod "webtyp.com/git"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
 
-	"github.com/tinywasm/gorelease"
+	"webtyp.com/gorelease"
 )
 
 func TestReleaseOnly_SingleCmd(t *testing.T) {
