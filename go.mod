@@ -3,7 +3,7 @@ module webtyp.com/gorelease
 go 1.25.2
 
 require (
-	webtyp.com/command v0.0.3
+	webtyp.com/command v0.0.4
 	webtyp.com/ghaction v0.1.2
 	webtyp.com/git v0.0.8
 	webtyp.com/keyring v0.2.4
