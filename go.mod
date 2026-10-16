@@ -6,7 +6,7 @@ require (
 	webtyp.com/command v0.0.4
 	webtyp.com/ghaction v0.1.2
 	webtyp.com/git v0.0.8
-	webtyp.com/keyring v0.2.8
+	webtyp.com/keyring v0.2.9
 )
 
 require (
