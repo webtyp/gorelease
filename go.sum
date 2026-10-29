@@ -16,5 +16,5 @@ webtyp.com/git v0.0.8 h1:Ws2EvqhDTEt6yEUz/fxd2RuTcL5eyeI8uhdqadJg6AY=
 webtyp.com/git v0.0.8/go.mod h1:hCVzE+FmI08uE/vTOimnZT3JA6APEgdKFdF91PtmLs4=
 webtyp.com/keyring v0.2.9 h1:uhFt7JjzFuDxS9UrYglNkSr3CLiQBQfHlZeQfRoLNfk=
 webtyp.com/keyring v0.2.9/go.mod h1:DHPzqUQ6S0I8A25YDXgVauZ+UZtEfph2zm6Xx5t4q+8=
-webtyp.com/webauthn v0.1.6 h1:9m/FpKlSrTgKMB4/NBpr/1HtSvlBX6PKA9TBL/nz2h4=
-webtyp.com/webauthn v0.1.6/go.mod h1:dER+vFPMXkOUM09hgWGQA8eJOlMhAHfO9k9x9FL1u4I=
+webtyp.com/webauthn v0.1.16 h1:JgR4KiUgwnb0wmCTHjayiyWQEhV1BTAzEqeFwnmALZg=
+webtyp.com/webauthn v0.1.16/go.mod h1:U3ea6ePslpyNWtMyweq+NAslSaU+J9v1HYO3tGZwdvQ=
