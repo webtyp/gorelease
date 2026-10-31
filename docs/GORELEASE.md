@@ -19,6 +19,7 @@ go install webtyp.com/gorelease/cmd/gorelease@latest
 
 ```bash
 gorelease [tag]
+gorelease image [tag]
 gorelease version
 ```
 
@@ -29,6 +30,7 @@ gorelease version
 
 ### Commands
 
+* **image**: Builds a self-hosted webtyp app's container image (`linux/amd64`) and pushes it to `ghcr.io`, pinned by digest. Needs Docker and a one-time setup: `gh auth refresh -s write:packages` and `gh auth token | docker login ghcr.io -u <user> --password-stdin`. See the [Image Flow](diagrams/IMAGE_FLOW.md).
 * **version**: Prints `GORELEASE_VERSION=<version>` and exits.
 
 ### Behavior
@@ -81,6 +83,9 @@ gorelease
 
 # Release an explicit tag
 gorelease v1.2.3
+
+# Build and push an app's container image for a specific tag
+gorelease image v1.2.3
 
 # Print version
 gorelease version
