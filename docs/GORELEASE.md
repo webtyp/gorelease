@@ -20,6 +20,7 @@ go install webtyp.com/gorelease/cmd/gorelease@latest
 ```bash
 gorelease [tag]
 gorelease image [tag]
+gorelease key
 gorelease version
 ```
 
@@ -31,6 +32,7 @@ gorelease version
 ### Commands
 
 * **image**: Builds a self-hosted webtyp app's container image (`linux/amd64`) and pushes it to `ghcr.io`, pinned by digest. Needs Docker and a one-time setup: `gh auth refresh -s write:packages` and `gh auth token | docker login ghcr.io -u <user> --password-stdin`. See the [Image Flow](diagrams/IMAGE_FLOW.md).
+* **key**: Prints the publisher's public key (base64) to paste into `/opt/<app>/update.pub`.
 * **version**: Prints `GORELEASE_VERSION=<version>` and exits.
 
 ### Behavior
@@ -55,6 +57,8 @@ gorelease version
 6. **GitHub Release**: Creates a GitHub Release using the `gh` CLI, with the tag name as
    the title, and uploads the cross-compiled binaries and checksums as release assets.
 7. **Cleanup**: Automatically removes the temporary directory (Go CLI, `os.MkdirTemp gorelease-*`) or `dist/` (bash action, created fresh).
+
+For a self-hosted webtyp app (`config/deploy.go` with `Target: selfupdate.Server` and `CI: gorelease.Local`), running `gorelease [tag]` will instead build and push the image, generate `compose.yaml` with `selfupdate.ComposeFile`, sign `manifest.txt` (`Version`, `Image`, `Digest`, `ComposeDigest`) with the publisher's key in `webtyp/keyring`, and upload `compose.yaml`, `manifest.txt` and `manifest.sig` to the app's own repository.
 
 ### Targets
 
@@ -108,4 +112,6 @@ Inputs: `tag`, `setup-go`. Outputs: `release-url`. The action builds directly wi
 
 ## Flow Diagram
 
-See [GORELEASE_FLOW.md](diagrams/GORELEASE_FLOW.md) — Visual representation of the `gorelease` process.
+See [GORELEASE_FLOW.md](diagrams/GORELEASE_FLOW.md) — Visual representation of the standard `gorelease` process.
+
+See [APP_RELEASE_FLOW.md](diagrams/APP_RELEASE_FLOW.md) — Visual representation of the app release process.
