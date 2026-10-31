@@ -2,6 +2,8 @@
 PLAN: "feat: gorelease image — build a webtyp app's container image on the developer's machine and push it pinned by digest"
 EXECUTOR: jules
 REVIEWER: none
+STATUS: running
+SESSION: 12812718285687442962
 ---
 
 > Read AGENTS.md at the repo root before any change.
