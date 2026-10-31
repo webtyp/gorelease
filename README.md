@@ -32,12 +32,15 @@ See [`action.yml`](./action.yml) for all inputs/outputs.
 ```bash
 gorelease [tag]
 gorelease image [tag]
+gorelease key      # prints publisher's public key
 gorelease version  # prints GORELEASE_VERSION
 ```
 
-### Apps: `gorelease image`
+### Apps: `gorelease [tag]` and `gorelease image`
 
-Builds a self-hosted webtyp app's container image (`linux/amd64`) and pushes it to `ghcr.io`, pinned by digest. Needs Docker and a one-time setup:
+In a self-hosted webtyp app (`config/deploy.go` with `Target: selfupdate.Server` and `CI: gorelease.Local`), running `gorelease [tag]` builds and pushes the image, generates `compose.yaml` with `selfupdate.ComposeFile`, signs `manifest.txt` (`Version`, `Image`, `Digest`, `ComposeDigest`) with the publisher's key in `webtyp/keyring`, and uploads `compose.yaml`, `manifest.txt` and `manifest.sig` to the app's own repository. See the [App Release Flow](docs/diagrams/APP_RELEASE_FLOW.md).
+
+`gorelease image [tag]` builds a self-hosted webtyp app's container image (`linux/amd64`) and pushes it to `ghcr.io`, pinned by digest. Needs Docker and a one-time setup:
 ```bash
 gh auth refresh -s write:packages
 gh auth token | docker login ghcr.io -u <user> --password-stdin
@@ -53,6 +56,8 @@ It refuses to build if the working tree is dirty, the tag is not at HEAD, or tes
 | `/app/certs` | an empty folder for the TLS certificate volume |
 
 See the [Image Flow](docs/diagrams/IMAGE_FLOW.md).
+
+`gorelease key` prints the base64 public key for `/opt/<app>/update.pub`.
 
 ## Documentation
 

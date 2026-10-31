@@ -23,7 +23,10 @@ Arguments:
 
 Commands:
     image [tag] — build the webtyp app's container image (linux/amd64), push it to ghcr.io and print it pinned by digest. Needs Docker and 'gh auth refresh -s write:packages' once.
+    key        Print the publisher's public key (update.pub) in base64 and exit
     version    Print GORELEASE_VERSION and exit
+
+    In a webtyp app, gorelease [tag] builds the image, signs the manifest and compose.yaml, and creates the Release in the same repository.
 
 Publication:
     If the current repository is PRIVATE, gorelease automatically attempts to
@@ -46,6 +49,21 @@ Examples:
 	// Handle version subcommand before ParseReleaseArgs
 	if len(os.Args) > 1 && os.Args[1] == "version" {
 		fmt.Printf("GORELEASE_VERSION=%s\n", gorelease.Version)
+		os.Exit(0)
+	}
+
+	if len(os.Args) > 1 && os.Args[1] == "key" {
+		kr, err := keyring.NewKeyring("gorelease")
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "Error:", err)
+			os.Exit(1)
+		}
+		pub, err := gorelease.PublicKeyText(kr)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "Error:", err)
+			os.Exit(1)
+		}
+		fmt.Println(pub)
 		os.Exit(0)
 	}
 
@@ -136,8 +154,20 @@ Examples:
 	goHandler.SetLog(log)
 	goHandler.SetConsoleOutput(func(s string) { fmt.Println(s) })
 
-	if err := goHandler.ReleaseOnly(tag, gh); err != nil {
-		fmt.Println("Release failed:", err)
-		os.Exit(1)
+	if gorelease.IsApp(".") {
+		kr, err := keyring.NewKeyring("gorelease")
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "Error:", err)
+			os.Exit(1)
+		}
+		if err := goHandler.ReleaseApp(tag, gh, kr, gorelease.AppDeps{}); err != nil {
+			fmt.Println("Release failed:", err)
+			os.Exit(1)
+		}
+	} else {
+		if err := goHandler.ReleaseOnly(tag, gh); err != nil {
+			fmt.Println("Release failed:", err)
+			os.Exit(1)
+		}
 	}
 }

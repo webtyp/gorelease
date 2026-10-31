@@ -3,8 +3,10 @@ PLAN: "feat: release a self-hosted webtyp app — signed manifest, compose.yaml,
 TAG: v0.1.10
 EXECUTOR: jules
 REVIEWER: none
-STATUS: running
+STATUS: review
 SESSION: 2089433625924173637
+PR: https://github.com/webtyp/gorelease/pull/2
+REVIEWED_COMMIT: 71efa99845070292c9af4968372acd69028c2488
 ---
 
 > Read AGENTS.md at the repo root before any change.

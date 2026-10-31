@@ -4,10 +4,14 @@ go 1.26.8
 
 require (
 	webtyp.com/command v0.0.4
+	webtyp.com/crypto v0.0.30
+	webtyp.com/deploy v0.2.114
 	webtyp.com/ghaction v0.1.2
 	webtyp.com/git v0.0.8
-	webtyp.com/keyring v0.2.9
+	webtyp.com/keyring v0.2.10
+	webtyp.com/selfupdate v0.0.8
 	webtyp.com/sitec v0.2.85
+	webtyp.com/update v0.0.6
 )
 
 require (
@@ -36,7 +40,7 @@ require (
 	webtyp.com/image v0.1.16 // indirect
 	webtyp.com/js v0.1.0 // indirect
 	webtyp.com/json v0.5.37 // indirect
-	webtyp.com/lang v0.1.9 // indirect
+	webtyp.com/lang v0.1.10 // indirect
 	webtyp.com/model v0.2.12 // indirect
 	webtyp.com/modfind v0.0.11 // indirect
 	webtyp.com/pwa v0.2.13 // indirect
