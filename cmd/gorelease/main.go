@@ -15,12 +15,14 @@ func main() {
 
 Usage:
     gorelease [tag]
+    gorelease image [tag]
     gorelease version
 
 Arguments:
     tag        Tag name (optional, uses latest tag if not provided)
 
 Commands:
+    image [tag] — build the webtyp app's container image (linux/amd64), push it to ghcr.io and print it pinned by digest. Needs Docker and 'gh auth refresh -s write:packages' once.
     version    Print GORELEASE_VERSION and exit
 
 Publication:
@@ -44,6 +46,32 @@ Examples:
 	// Handle version subcommand before ParseReleaseArgs
 	if len(os.Args) > 1 && os.Args[1] == "version" {
 		fmt.Printf("GORELEASE_VERSION=%s\n", gorelease.Version)
+		os.Exit(0)
+	}
+
+	if len(os.Args) > 1 && os.Args[1] == "image" {
+		git, err := gitmod.NewGit()
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "Error:", err)
+			os.Exit(1)
+		}
+		g, err := gorelease.New(git)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "Error:", err)
+			os.Exit(1)
+		}
+
+		var tag string
+		if len(os.Args) > 2 {
+			tag = os.Args[2]
+		}
+
+		img, err := g.BuildImage(tag, gorelease.AppDeps{})
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+		fmt.Println(img.Reference())
 		os.Exit(0)
 	}
 

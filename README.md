@@ -31,8 +31,28 @@ See [`action.yml`](./action.yml) for all inputs/outputs.
 
 ```bash
 gorelease [tag]
+gorelease image [tag]
 gorelease version  # prints GORELEASE_VERSION
 ```
+
+### Apps: `gorelease image`
+
+Builds a self-hosted webtyp app's container image (`linux/amd64`) and pushes it to `ghcr.io`, pinned by digest. Needs Docker and a one-time setup:
+```bash
+gh auth refresh -s write:packages
+gh auth token | docker login ghcr.io -u <user> --password-stdin
+```
+
+It refuses to build if the working tree is dirty, the tag is not at HEAD, or tests fail. The resulting image holds:
+
+| Path in the image | Built from |
+|---|---|
+| `/app/server` | `./web/server` — the entrypoint |
+| `/app/migrate` | `./cmd/migrate`, only if that folder exists |
+| `/app/web/public` | the site, built in release mode by `webtyp.com/sitec` |
+| `/app/certs` | an empty folder for the TLS certificate volume |
+
+See the [Image Flow](docs/diagrams/IMAGE_FLOW.md).
 
 ## Documentation
 

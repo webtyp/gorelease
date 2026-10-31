@@ -2,8 +2,10 @@
 PLAN: "feat: gorelease image — build a webtyp app's container image on the developer's machine and push it pinned by digest"
 EXECUTOR: jules
 REVIEWER: none
-STATUS: running
+STATUS: review
 SESSION: 12812718285687442962
+PR: https://github.com/webtyp/gorelease/pull/1
+REVIEWED_COMMIT: 5bd822d50be94513c1c84372db850b537f580fed
 ---
 
 > Read AGENTS.md at the repo root before any change.
