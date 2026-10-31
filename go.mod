@@ -5,12 +5,12 @@ go 1.26.8
 require (
 	webtyp.com/command v0.0.4
 	webtyp.com/crypto v0.0.30
-	webtyp.com/deploy v0.2.114
+	webtyp.com/deploy v0.2.115
 	webtyp.com/ghaction v0.1.2
 	webtyp.com/git v0.0.8
 	webtyp.com/keyring v0.2.10
 	webtyp.com/lang v0.1.10
-	webtyp.com/selfupdate v0.0.10
+	webtyp.com/selfupdate v0.0.11
 	webtyp.com/sitec v0.2.85
 	webtyp.com/update v0.0.6
 )
