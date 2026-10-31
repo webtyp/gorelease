@@ -3,6 +3,8 @@ PLAN: "feat: gorelease.NewCI implements deploy.CI"
 TAG: v0.1.11
 EXECUTOR: jules
 REVIEWER: none
+STATUS: running
+SESSION: 1664364813568236283
 ---
 
 > Read AGENTS.md at the repo root before any change.
