@@ -3,8 +3,10 @@ PLAN: "feat: gorelease.NewCI implements deploy.CI"
 TAG: v0.1.11
 EXECUTOR: jules
 REVIEWER: none
-STATUS: running
+STATUS: review
 SESSION: 1664364813568236283
+PR: https://github.com/webtyp/gorelease/pull/3
+REVIEWED_COMMIT: 85b2059741c5fb280ebd86b8b478df915acd1525
 ---
 
 > Read AGENTS.md at the repo root before any change.
