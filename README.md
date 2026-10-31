@@ -59,6 +59,18 @@ See the [Image Flow](docs/diagrams/IMAGE_FLOW.md).
 
 `gorelease key` prints the base64 public key for `/opt/<app>/update.pub`.
 
+## Programmatic Usage
+
+`gorelease.NewCI(CIConfig)` implements `deploy.CI` to release from your local machine.
+
+```go
+ci, err := gorelease.NewCI(gorelease.CIConfig{
+    RootDir:  ".",
+    KeyStore: kr,
+    GitHub:   gh,
+})
+```
+
 ## Documentation
 
 - [GORELEASE.md](docs/GORELEASE.md) — detailed CLI behavior, targets, requirements
