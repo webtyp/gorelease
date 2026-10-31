@@ -3,6 +3,8 @@ PLAN: "feat: release a self-hosted webtyp app — signed manifest, compose.yaml,
 TAG: v0.1.10
 EXECUTOR: jules
 REVIEWER: none
+STATUS: running
+SESSION: 2089433625924173637
 ---
 
 > Read AGENTS.md at the repo root before any change.
