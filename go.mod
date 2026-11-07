@@ -40,7 +40,7 @@ require (
 	webtyp.com/html v0.0.30 // indirect
 	webtyp.com/image v0.1.16 // indirect
 	webtyp.com/js v0.1.0 // indirect
-	webtyp.com/json v0.5.37 // indirect
+	webtyp.com/json v0.5.40 // indirect
 	webtyp.com/model v0.2.12 // indirect
 	webtyp.com/modfind v0.0.11 // indirect
 	webtyp.com/pwa v0.2.13 // indirect
