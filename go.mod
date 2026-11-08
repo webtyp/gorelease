@@ -9,7 +9,7 @@ require (
 	webtyp.com/ghaction v0.1.2
 	webtyp.com/git v0.0.8
 	webtyp.com/keyring v0.2.10
-	webtyp.com/lang v0.1.15
+	webtyp.com/lang v0.1.16
 	webtyp.com/selfupdate v0.0.11
 	webtyp.com/sitec v0.2.87
 	webtyp.com/update v0.0.6
